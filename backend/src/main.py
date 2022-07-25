@@ -1,4 +1,5 @@
-from fastapi import FastAPI, UploadFile
+from http.client import HTTPException
+from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import uuid
@@ -42,6 +43,10 @@ async def get_tasks() -> List[Task]:
 
 @app.post("/api/tasks")
 async def create_task(file: UploadFile):
+    file_ext = file.filename.split(".")[-1]
+    if file.content_type != "application/octet-stream" or file_ext != "py":
+        raise HTTPException(status_code=400, detail="Invalid file type.")
+
     content = await file.read()
 
     rname = str(uuid.uuid4())

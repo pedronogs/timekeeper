@@ -91,6 +91,7 @@ export default defineComponent({
 					type: type,
 					message: message,
 					position: "top-right",
+					timeout: 2000
 				});
 			},
 		};
@@ -109,10 +110,15 @@ export default defineComponent({
 					};
 				});
 			}).catch(error => {
-				this.triggerNotification("negative", error.data.message)
+				this.triggerNotification("negative", error.response.data.detail)
 			});
 		},
 		addNewTask() {
+			if (this.newTaskFile.size == 0) {
+				this.triggerNotification("negative", "Please select a valid Python (.py) file.");
+				return;
+			}
+
 			let newTask = new FormData();
 			newTask.append('file', this.newTaskFile);
 
@@ -125,8 +131,10 @@ export default defineComponent({
 					this.triggerNotification("positive", response.data.message)
 				})
 				.catch(error => {
-					this.triggerNotification("negative", error.data.message)
-				});
+					this.triggerNotification("negative", error.response.data.detail)
+				}).then(() => {
+					this.newTaskFile = new Blob;
+				})
 		}
 	}
 });
