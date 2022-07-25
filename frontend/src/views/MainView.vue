@@ -34,7 +34,12 @@
 		<q-dialog v-model="promptNewTask" persistent>
 			<q-card style="width: 500px">
 				<q-card-section>
-					<div class="text-h6">Your Python Script</div>
+					<div class="text-h6">Create a New Task</div>
+				</q-card-section>
+
+				<q-card-section>
+					<q-input outlined v-model="newTaskData.name" label="Task Name" stack-label dense />
+					<q-input outlined v-model="newTaskData.trigger" label="Cron Trigger" stack-label dense class="q-mt-md" />
 				</q-card-section>
 
 				<q-card-section class="q-pt-none">
@@ -51,6 +56,8 @@
 						</template>
 					</q-file>
 				</q-card-section>
+
+				<q-separator></q-separator>
 
 				<q-card-actions align="evenly" class="text-primary">
 					<q-btn flat label="Cancel" v-close-popup />
@@ -78,6 +85,10 @@ export default defineComponent({
 		return {
 			promptNewTask: false as boolean,
 			newTaskFile: new Blob as Blob,
+			newTaskData: {
+				name: "",
+				trigger: ""
+			} as Record<string, string>,
 			tasks: [] as Array<Task>,
 			colors: ["burlywood", "darkolivegreen", "green", "black", "orange", "indigo", "brown", "darkslateblue", "darkslategray", "steelblue", "teal"]
 		};
@@ -102,13 +113,7 @@ export default defineComponent({
 	methods: {
 		getTasks() {
 			axios.get("/api/tasks").then(response => {
-				this.tasks = response.data.map((task: { id: string, next_run_time: string, schedule: string }) => {
-					return {
-						id: task.id,
-						schedule: task.schedule,
-						nextRunTime: task.next_run_time,
-					};
-				});
+				this.tasks = response.data
 			}).catch(error => {
 				this.triggerNotification("negative", error.response.data.detail)
 			});
@@ -120,7 +125,9 @@ export default defineComponent({
 			}
 
 			let newTask = new FormData();
-			newTask.append('file', this.newTaskFile);
+			newTask.append("file", this.newTaskFile);
+			newTask.append("name", this.newTaskData.name);
+			newTask.append("trigger", this.newTaskData.trigger);
 
 			axios.post("/api/tasks", newTask, {
 				headers: {
@@ -128,7 +135,9 @@ export default defineComponent({
 				}
 			})
 				.then(response => {
-					this.triggerNotification("positive", response.data.message)
+					this.tasks.push(response.data)
+
+					this.triggerNotification("positive", "Task created successfully.")
 				})
 				.catch(error => {
 					this.triggerNotification("negative", error.response.data.detail)

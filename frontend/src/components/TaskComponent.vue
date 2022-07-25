@@ -1,23 +1,23 @@
 <template>
 	<q-card class="task d-flex flex-column">
 		<q-card-section class="card-header text-white" :style="{'background-color': color}">
-			<div class="text-h6">Evaluation</div>
+			<div class="text-h6">{{ taskData.name }}</div>
 			<div class="text-subtitle2">Task ID: {{ taskData.id }}</div>
 		</q-card-section>
 
 		<q-separator inset />
 
 		<q-card-section>
-			<span>Last run: 01/01/2001</span><br />
-			<span>Last run time: 1h</span><br />
-			<span>Last status: Success</span><br />
-			<span>Next run scheduled for: {{ formattedRunDate }}</span>
+			<span>Last run: {{ lastRunDate }}</span><br />
+			<span>Last run time: -</span><br />
+			<span>Last status: -</span><br />
+			<span>Next run scheduled for: {{ nextRunDate }}</span>
 		</q-card-section>
 
 		<q-separator inset />
 
 		<q-card-actions align="around">
-			<q-btn flat>Schedule</q-btn>
+			<q-btn flat>Edit Scheduler</q-btn>
 			<q-btn flat>Run NOW!</q-btn>
 		</q-card-actions>
 	</q-card>
@@ -30,13 +30,19 @@ import type { Task } from "../types/types";
 export default defineComponent({
 	name: "TaskComponent",
 	computed: {
-		formattedRunDate() {
-			if (this.taskData == undefined || this.taskData.nextRunTime == undefined) {
-				return "";
+		lastRunDate() {
+			if (this.taskData == undefined || this.taskData.last_run_time == undefined || this.taskData.last_run_time == null) {
+				return "-";
 			}
 
-			console.log(this.taskData.nextRunTime)
-			return new Date(this.taskData.nextRunTime).toLocaleString();
+			return new Date(this.taskData.last_run_time).toLocaleString()
+		},
+		nextRunDate() {
+			if (this.taskData == undefined || this.taskData.next_run_time == undefined) {
+				return "-";
+			}
+
+			return new Date(this.taskData.next_run_time).toLocaleString()
 		}
 	},
 	props: {
