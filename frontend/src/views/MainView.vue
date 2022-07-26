@@ -38,8 +38,8 @@
 				</q-card-section>
 
 				<q-card-section>
-					<q-input outlined v-model="newTaskData.name" label="Task Name" stack-label dense />
-					<q-input outlined v-model="newTaskData.trigger" label="Cron Trigger" stack-label dense class="q-mt-md" />
+					<q-input outlined v-model="newTaskData.name" label="Task Name" stack-label />
+					<q-input outlined v-model="newTaskData.trigger" label="Cron Expression (5 values)" stack-label class="q-mt-md" />
 				</q-card-section>
 
 				<q-card-section class="q-pt-none">

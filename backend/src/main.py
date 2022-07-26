@@ -3,6 +3,8 @@ from http.client import HTTPException
 from typing import List, Type
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.jobstores.mongodb import MongoDBJobStore
+from apscheduler.triggers.cron import CronTrigger
 from backend.src.models.Task import TaskRequest, TaskResponse
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -30,7 +32,24 @@ def init_data():
 
     global scheduler
     scheduler = AsyncIOScheduler()
+    scheduler.add_jobstore(
+        MongoDBJobStore(client=mongo_client,
+                        database="timekeeper",
+                        collection="jobs"))
     scheduler.start()
+
+
+def get_cron_from_trigger(trigger: CronTrigger) -> str:
+    cron_fields = trigger.fields
+
+    cron_string = [""] * 5
+    cron_pattern = ["minute", "hour", "day", "month", "day_of_week"]
+    for f in cron_fields:
+        if f.name in cron_pattern:
+            idx = cron_pattern.index(f.name)
+            cron_string[idx] = str(f)
+
+    return " ".join(cron_string)
 
 
 @app.get("/api/tasks")
@@ -40,11 +59,34 @@ async def get_tasks() -> List[TaskResponse]:
         tasks.append(
             TaskResponse(id=job.id,
                          name=job.name,
-                         trigger=str(job.trigger),
+                         trigger=get_cron_from_trigger(job.trigger),
                          last_run_time=None,
                          next_run_time=job.next_run_time))
 
     return tasks
+
+
+@app.put("/api/tasks/{task_id}")
+def update_task(task_id: str, task_request: TaskRequest):
+    job = scheduler.get_job(task_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Task not found.")
+
+    try:
+        trigger_cron = CronTrigger.from_crontab(task_request.trigger)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid cron expression.")
+
+    job.modify(name=task_request.name, trigger=trigger_cron)
+    return TaskResponse(id=task_id,
+                        name=job.name,
+                        trigger=get_cron_from_trigger(job.trigger),
+                        last_run_time=None,
+                        next_run_time=job.next_run_time)
+
+
+def run_job(content: bytes = None):
+    exec(content)
 
 
 @app.post("/api/tasks")
@@ -54,7 +96,6 @@ async def create_task(name: str = Form(...),
     task_data = TaskRequest(name=name, trigger=trigger)
 
     file_ext = file.filename.split(".")[-1]
-    print(file.content_type, file_ext)
     if file.content_type != "text/x-python" or file_ext != "py":
         raise HTTPException(status_code=400, detail="Invalid file type.")
 
@@ -65,8 +106,12 @@ async def create_task(name: str = Form(...),
     with open(fpath, "wb") as f:
         f.write(content)
 
-    task = lambda: exec(content)
-    job = scheduler.add_job(task, 'interval', seconds=10)
+    try:
+        trigger_cron = CronTrigger.from_crontab(trigger)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid cron expression.")
+
+    job = scheduler.add_job(run_job, trigger_cron, kwargs={"content": content})
 
     mongo_client["timekeeper"]["tasks"].insert_one({
         "id": job.id,
