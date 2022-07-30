@@ -66,6 +66,42 @@ async def get_tasks() -> List[TaskResponse]:
     return tasks
 
 
+@app.put("/api/tasks/{task_id}/pause")
+def pause_task(task_id: str):
+    job = scheduler.get_job(task_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Task not found.")
+
+    job.pause()
+    job = scheduler.get_job(
+        task_id
+    )  # This is necessary because pause does not return updated job metadata
+
+    return TaskResponse(id=task_id,
+                        name=job.name,
+                        trigger=get_cron_from_trigger(job.trigger),
+                        last_run_time=None,
+                        next_run_time=job.next_run_time)
+
+
+@app.put("/api/tasks/{task_id}/resume")
+def resume_task(task_id: str):
+    job = scheduler.get_job(task_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Task not found.")
+
+    job.resume()
+    job = scheduler.get_job(
+        task_id
+    )  # This is necessary because pause does not return updated job metadata
+
+    return TaskResponse(id=task_id,
+                        name=job.name,
+                        trigger=get_cron_from_trigger(job.trigger),
+                        last_run_time=None,
+                        next_run_time=job.next_run_time)
+
+
 @app.put("/api/tasks/{task_id}")
 def update_task(task_id: str, task_request: TaskRequest):
     job = scheduler.get_job(task_id)

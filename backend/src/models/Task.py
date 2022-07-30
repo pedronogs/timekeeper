@@ -12,4 +12,4 @@ class TaskResponse(BaseModel):
     name: str
     trigger: str
     last_run_time: datetime = None
-    next_run_time: datetime
+    next_run_time: datetime = None

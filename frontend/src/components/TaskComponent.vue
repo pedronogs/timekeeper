@@ -22,7 +22,13 @@
 
 			<q-card-actions align="around">
 				<q-btn flat @click="promptUpdateTask = true">EDIT</q-btn>
-				<q-btn flat style="color: red" @click="pauseTask">PAUSE</q-btn>
+				<q-btn
+					v-if="newTaskData.next_run_time != null"
+					flat
+					style="color: red"
+					@click="promptPauseTask = true"
+				>PAUSE</q-btn>
+				<q-btn v-else flat style="color: green" @click="resumeTask">RESUME</q-btn>
 				<q-btn flat>Run NOW!</q-btn>
 			</q-card-actions>
 		</q-card>
@@ -96,6 +102,37 @@
 				</q-card-actions>
 			</q-card>
 		</q-dialog>
+
+		<!-- Confirm Pause -->
+		<q-dialog v-model="promptPauseTask" persistent>
+			<q-card>
+				<q-card-section class="row items-center">
+					<q-icon name="pause_circle_outline" color="red" size="md" />
+					<span style="font-size: 1.3rem" class="q-ml-md">
+						<strong>Pause Task</strong>
+					</span>
+				</q-card-section>
+
+				<q-separator />
+
+				<q-card-section class="q-pa-lg text-center" style="font-size: 0.9rem">
+					<span>
+						Are you
+						<strong>completely</strong>
+						sure you want to pause this task?
+					</span>
+					<br />
+					<span>ID: {{this.taskData.id}}</span>
+				</q-card-section>
+
+				<q-separator />
+
+				<q-card-actions align="evenly">
+					<q-btn flat label="Cancel" color="primary" v-close-popup />
+					<q-btn flat label="PAUSE" color="red" v-close-popup @click="pauseTask" />
+				</q-card-actions>
+			</q-card>
+		</q-dialog>
 	</div>
 </template>
 
@@ -110,6 +147,7 @@ export default defineComponent({
 	data() {
 		return {
 			promptUpdateTask: false as boolean,
+			promptPauseTask: false as boolean,
 			updateTaskValue: { ...this.taskData } as Task,
 			promptDeleteTask: false as boolean,
 			newTaskData: { ...this.taskData } as Task,
@@ -160,6 +198,26 @@ export default defineComponent({
 
 			axios.put(`/api/tasks/${this.taskData.id}`, { name: this.updateTaskValue.name, trigger: this.updateTaskValue.trigger }).then((response) => {
 				this.triggerNotification("positive", "Task updated successfully!");
+				this.newTaskData = response.data
+			}).catch((error) => {
+				this.triggerNotification("negative", error.response.data.detail);
+			});
+		},
+		pauseTask() {
+			if (this.taskData == undefined) return;
+
+			axios.put(`/api/tasks/${this.taskData.id}/pause`).then((response) => {
+				this.triggerNotification("positive", "Task paused!");
+				this.newTaskData = response.data
+			}).catch((error) => {
+				this.triggerNotification("negative", error.response.data.detail);
+			});
+		},
+		resumeTask() {
+			if (this.taskData == undefined) return;
+
+			axios.put(`/api/tasks/${this.taskData.id}/resume`).then((response) => {
+				this.triggerNotification("positive", "Task resumed!");
 				this.newTaskData = response.data
 			}).catch((error) => {
 				this.triggerNotification("negative", error.response.data.detail);
