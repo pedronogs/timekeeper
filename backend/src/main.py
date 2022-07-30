@@ -77,7 +77,12 @@ def update_task(task_id: str, task_request: TaskRequest):
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid cron expression.")
 
-    job.modify(name=task_request.name, trigger=trigger_cron)
+    job.modify(name=task_request.name)
+    job.reschedule(trigger_cron)
+    job = scheduler.get_job(
+        task_id
+    )  # This is necessary because modify and reschedule does not return updated job metadata
+
     return TaskResponse(id=task_id,
                         name=job.name,
                         trigger=get_cron_from_trigger(job.trigger),

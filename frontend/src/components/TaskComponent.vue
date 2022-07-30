@@ -2,8 +2,8 @@
 	<div>
 		<q-card class="task d-flex flex-column">
 			<q-card-section class="card-header text-white" :style="{'background-color': color}">
-				<div class="text-h6">{{ taskData.name }}</div>
-				<div class="text-subtitle2">Task ID: {{ taskData.id }}</div>
+				<div class="text-h6">{{ newTaskData.name }}</div>
+				<div class="text-subtitle2">Task ID: {{ newTaskData.id }}</div>
 			</q-card-section>
 
 			<q-separator inset />
@@ -110,8 +110,9 @@ export default defineComponent({
 	data() {
 		return {
 			promptUpdateTask: false as boolean,
-			updateTaskValue: this.taskData as Task,
-			promptDeleteTask: false as boolean
+			updateTaskValue: { ...this.taskData } as Task,
+			promptDeleteTask: false as boolean,
+			newTaskData: { ...this.taskData } as Task,
 		}
 	},
 	setup() {
@@ -130,18 +131,18 @@ export default defineComponent({
 	},
 	computed: {
 		lastRunDate() {
-			if (this.taskData == undefined || this.taskData.last_run_time == undefined || this.taskData.last_run_time == null) {
+			if (this.newTaskData == undefined || this.newTaskData.last_run_time == undefined || this.newTaskData.last_run_time == null) {
 				return "-";
 			}
 
-			return new Date(this.taskData.last_run_time).toLocaleString()
+			return new Date(this.newTaskData.last_run_time).toLocaleString()
 		},
 		nextRunDate() {
-			if (this.taskData == undefined || this.taskData.next_run_time == undefined) {
+			if (this.newTaskData == undefined || this.newTaskData.next_run_time == undefined) {
 				return "-";
 			}
 
-			return new Date(this.taskData.next_run_time).toLocaleString()
+			return new Date(this.newTaskData.next_run_time).toLocaleString()
 		}
 	},
 	props: {
@@ -157,8 +158,9 @@ export default defineComponent({
 		updateTask() {
 			if (this.taskData == undefined) return;
 
-			axios.put(`/api/tasks/${this.taskData.id}`, { name: this.updateTaskValue.name, trigger: this.updateTaskValue.trigger }).then(() => {
+			axios.put(`/api/tasks/${this.taskData.id}`, { name: this.updateTaskValue.name, trigger: this.updateTaskValue.trigger }).then((response) => {
 				this.triggerNotification("positive", "Task updated successfully!");
+				this.newTaskData = response.data
 			}).catch((error) => {
 				this.triggerNotification("negative", error.response.data.detail);
 			});
