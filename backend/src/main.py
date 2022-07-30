@@ -2,10 +2,10 @@ import uuid
 from http.client import HTTPException
 from typing import List, Type
 
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.jobstores.mongodb import MongoDBJobStore
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
-from backend.src.models.Task import TaskRequest, TaskResponse
+from backend.src.models.task import TaskRequest, TaskResponse
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -85,11 +85,20 @@ def update_task(task_id: str, task_request: TaskRequest):
                         next_run_time=job.next_run_time)
 
 
+@app.delete("/api/tasks/{task_id}", status_code=204)
+def delete_task(task_id: str) -> None:
+    job = scheduler.get_job(task_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Task not found.")
+
+    job.remove()
+
+
 def run_job(content: bytes = None):
     exec(content)
 
 
-@app.post("/api/tasks")
+@app.post("/api/tasks", status_code=201)
 async def create_task(name: str = Form(...),
                       trigger: str = Form(...),
                       file: UploadFile = File(...)) -> TaskResponse:

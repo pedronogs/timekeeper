@@ -3,7 +3,14 @@
 		<div id="menu">
 			<div id="banner">TimeKeeper</div>
 			<q-list dark padding class="text-white">
-				<q-item dark clickable v-ripple :active="link === 'inbox'" @click="link = 'inbox'" active-class="my-menu-link">
+				<q-item
+					dark
+					clickable
+					v-ripple
+					:active="link === 'inbox'"
+					@click="link = 'inbox'"
+					active-class="my-menu-link"
+				>
 					<q-item-section avatar>
 						<q-icon name="schedule" />
 					</q-item-section>
@@ -11,7 +18,14 @@
 					<q-item-section>Tasks</q-item-section>
 				</q-item>
 
-				<q-item dark clickable v-ripple :active="link === 'inbox'" @click="link = 'inbox'" active-class="my-menu-link">
+				<q-item
+					dark
+					clickable
+					v-ripple
+					:active="link === 'inbox'"
+					@click="link = 'inbox'"
+					active-class="my-menu-link"
+				>
 					<q-item-section avatar>
 						<q-icon name="assessment" />
 					</q-item-section>
@@ -22,9 +36,24 @@
 		</div>
 
 		<div id="main-content" class="d-flex flex-row flex-wrap">
-			<task-component v-for="task in tasks" :key="task.id" :color="colors[Math.floor(Math.random() * (colors.length + 1))]" class="q-ma-md" :task-data="task" />
+			<task-component
+				v-for="task in tasks"
+				:key="task.id"
+				:color="colors[Math.floor(Math.random() * (colors.length + 1))]"
+				class="q-ma-md"
+				:task-data="task"
+				@delete-task="deleteTask"
+			/>
 			<div id="new-task" class="q-ma-md">
-				<q-btn label="Add New Task" color="white" text-color="blue" icon-right="add" size="md" fab @click="promptNewTask = true" />
+				<q-btn
+					label="Add New Task"
+					color="white"
+					text-color="blue"
+					icon-right="add"
+					size="md"
+					fab
+					@click="promptNewTask = true"
+				/>
 			</div>
 		</div>
 
@@ -39,7 +68,13 @@
 
 				<q-card-section>
 					<q-input outlined v-model="newTaskData.name" label="Task Name" stack-label />
-					<q-input outlined v-model="newTaskData.trigger" label="Cron Expression (5 values)" stack-label class="q-mt-md" />
+					<q-input
+						outlined
+						v-model="newTaskData.trigger"
+						label="Cron Expression (5 values)"
+						stack-label
+						class="q-mt-md"
+					/>
 				</q-card-section>
 
 				<q-card-section class="q-pt-none">
@@ -51,9 +86,7 @@
 							<q-icon name="close" @click.stop.prevent="model = null" class="cursor-pointer" />
 						</template>
 
-						<template v-slot:hint>
-							Add your custom python code
-						</template>
+						<template v-slot:hint>Add your custom python code</template>
 					</q-file>
 				</q-card-section>
 
@@ -144,6 +177,9 @@ export default defineComponent({
 				}).then(() => {
 					this.newTaskFile = new Blob;
 				})
+		},
+		deleteTask(deletedTaskID: string) {
+			this.tasks.splice(this.tasks.findIndex(task => task.id == deletedTaskID), 1);
 		}
 	}
 });

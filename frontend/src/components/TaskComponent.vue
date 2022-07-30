@@ -18,7 +18,8 @@
 			<q-separator inset />
 
 			<q-card-actions align="around">
-				<q-btn flat @click="promptUpdateTask = true">Edit Task</q-btn>
+				<q-btn flat @click="promptUpdateTask = true">EDIT</q-btn>
+				<q-btn flat style="color: red" @click="pauseTask">PAUSE</q-btn>
 				<q-btn flat>Run NOW!</q-btn>
 			</q-card-actions>
 		</q-card>
@@ -30,7 +31,7 @@
 				<q-card-section>
 					<div class="d-flex flex-row text-h6">
 						<span>Edit Task</span>
-						<q-btn flat label="Delete Task" icon-right="delete" text-color="red" v-close-popup style="margin-left: auto" />
+						<q-btn flat label="Delete Task" icon-right="delete" text-color="red" v-close-popup style="margin-left: auto" @click="deleteTask" />
 					</div>
 
 				</q-card-section>
@@ -112,6 +113,17 @@ export default defineComponent({
 
 			axios.put(`/api/tasks/${this.taskData.id}`, { name: this.updateTaskValue.name, trigger: this.updateTaskValue.trigger }).then(() => {
 				this.triggerNotification("positive", "Task updated successfully!");
+			}).catch((error) => {
+				this.triggerNotification("negative", error.response.data.detail);
+			});
+		},
+		deleteTask() {
+			if (this.taskData == undefined) return;
+
+			let taskID = this.taskData.id;
+			axios.delete(`/api/tasks/${taskID}`).then(() => {
+				this.triggerNotification("positive", "Task deleted!");
+				this.$emit("deleteTask", taskID);
 			}).catch((error) => {
 				this.triggerNotification("negative", error.response.data.detail);
 			});
