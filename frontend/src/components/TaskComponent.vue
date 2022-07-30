@@ -9,9 +9,12 @@
 			<q-separator inset />
 
 			<q-card-section>
-				<span>Last run: {{ lastRunDate }}</span><br />
-				<span>Last run time: -</span><br />
-				<span>Last status: -</span><br />
+				<span>Last run: {{ lastRunDate }}</span>
+				<br />
+				<span>Last run time: -</span>
+				<br />
+				<span>Last status: -</span>
+				<br />
 				<span>Next run scheduled for: {{ nextRunDate }}</span>
 			</q-card-section>
 
@@ -31,27 +34,69 @@
 				<q-card-section>
 					<div class="d-flex flex-row text-h6">
 						<span>Edit Task</span>
-						<q-btn flat label="Delete Task" icon-right="delete" text-color="red" v-close-popup style="margin-left: auto" @click="deleteTask" />
+						<q-btn
+							flat
+							label="Delete Task"
+							icon-right="delete"
+							text-color="red"
+							v-close-popup
+							style="margin-left: auto"
+							@click="promptDeleteTask = true"
+						/>
 					</div>
-
 				</q-card-section>
 
 				<q-card-section>
 					<q-input outlined v-model="updateTaskValue.name" label="Task Name" stack-label />
-					<q-input outlined v-model="updateTaskValue.trigger" label="Insert a valid Cron Trigger" stack-label class="q-mt-md" />
+					<q-input
+						outlined
+						v-model="updateTaskValue.trigger"
+						label="Insert a valid Cron Trigger"
+						stack-label
+						class="q-mt-md"
+					/>
 				</q-card-section>
 
 				<q-separator></q-separator>
 
 				<q-card-actions align="evenly" class="text-primary">
 					<q-btn flat label="Cancel" v-close-popup />
-
 					<q-btn flat label="Confirm" v-close-popup @click="updateTask" />
 				</q-card-actions>
 			</q-card>
 		</q-dialog>
-	</div>
 
+		<!-- Confirm Deletion -->
+		<q-dialog v-model="promptDeleteTask" persistent>
+			<q-card>
+				<q-card-section class="row items-center">
+					<q-icon name="delete" color="red" size="md" />
+					<span style="font-size: 1.3rem" class="q-ml-md">
+						<strong>Delete Task</strong>
+					</span>
+				</q-card-section>
+
+				<q-separator />
+
+				<q-card-section class="q-pa-lg text-center" style="font-size: 0.9rem">
+					<span>
+						Are you
+						<strong>completely</strong>
+						sure you want to delete this task?
+					</span>
+					<br />
+					<span>ID: {{this.taskData.id}}</span>
+				</q-card-section>
+
+				<q-separator />
+
+				<q-card-actions align="evenly">
+					<q-btn flat label="Cancel" color="primary" v-close-popup />
+					<q-btn flat label="DELETE" color="red" v-close-popup @click="deleteTask" />
+				</q-card-actions>
+			</q-card>
+		</q-dialog>
+	</div>
 </template>
 
 <script lang="ts">
@@ -65,7 +110,8 @@ export default defineComponent({
 	data() {
 		return {
 			promptUpdateTask: false as boolean,
-			updateTaskValue: this.taskData as Task
+			updateTaskValue: this.taskData as Task,
+			promptDeleteTask: false as boolean
 		}
 	},
 	setup() {

@@ -13,5 +13,8 @@ export default {
   config: {},
   plugins: {
     Notify
-  }
+  },
+  extras: [
+    'material-icons'
+  ]
 }
