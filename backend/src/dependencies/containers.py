@@ -4,8 +4,6 @@ from backend.src.dependencies.scheduler import AppScheduler
 
 
 class Container(containers.DeclarativeContainer):
-    wiring_config = containers.WiringConfiguration(
-        modules=["backend.src.api.task"])
+    wiring_config = containers.WiringConfiguration(modules=["backend.src.api.task"])
     mongo_client = providers.Singleton(AppMongoClient)
-    scheduler = providers.Singleton(AppScheduler,
-                                    mongo_client=mongo_client.provider)
+    scheduler = providers.Singleton(AppScheduler, mongo_client=mongo_client.provider)

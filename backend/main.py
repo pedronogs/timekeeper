@@ -27,9 +27,7 @@ app.add_middleware(
 app.container = container
 app.include_router(task_router)
 
-app.mount("/",
-          StaticFiles(directory="./frontend/dist", html=True),
-          name="static")
+app.mount("/", StaticFiles(directory="./frontend/dist", html=True), name="static")
 
 
 @app.on_event("startup")
