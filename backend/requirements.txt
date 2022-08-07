@@ -2,3 +2,9 @@ yapf
 flake8
 fastapi
 uvicorn
+dependency-injector
+loguru
+apscheduler
+docker
+pymongo
+python-multipart

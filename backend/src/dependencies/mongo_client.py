@@ -3,7 +3,7 @@ from pymongo import MongoClient
 
 class AppMongoClient:
 
-    def __init__(self, host: str = "localhost", port: int = 27017):
+    def __init__(self, host: str = "host.docker.internal", port: int = 27017):
         self.mongo_client = MongoClient(f"mongodb://{host}:{port}/")
 
     def __call__(self) -> MongoClient:
