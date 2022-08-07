@@ -9,8 +9,6 @@
 			<q-separator inset />
 
 			<q-card-section>
-				<span>Last run: {{ lastRunDate }}</span>
-				<br />
 				<span>Last run time: -</span>
 				<br />
 				<span>Last status: -</span>
@@ -29,7 +27,7 @@
 					@click="promptPauseTask = true"
 				>PAUSE</q-btn>
 				<q-btn v-else flat style="color: green" @click="resumeTask">RESUME</q-btn>
-				<q-btn flat>Run NOW!</q-btn>
+				<q-btn flat @click="startTask">Run NOW!</q-btn>
 			</q-card-actions>
 		</q-card>
 
@@ -193,6 +191,16 @@ export default defineComponent({
 		},
 	},
 	methods: {
+		startTask() {
+			if (this.taskData == undefined) return;
+
+			axios.put(`/api/tasks/${this.taskData.id}/start`).then((response) => {
+				this.triggerNotification("positive", "Task started successfully!");
+				this.newTaskData = response.data
+			}).catch((error) => {
+				this.triggerNotification("negative", error.response.data.detail);
+			});
+		},
 		updateTask() {
 			if (this.taskData == undefined) return;
 
@@ -241,6 +249,6 @@ export default defineComponent({
 <style lang="sass">
 .task
 	width: 355px
-	height: 255px
+	height: 235px
 	background-color: white
 </style>
