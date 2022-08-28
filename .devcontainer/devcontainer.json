@@ -16,7 +16,7 @@
     },
     "mounts": [
         "source=//var/run/docker.sock,target=//var/run/docker.sock,type=bind",
-        "source=timekeeper-client-scripts,target=/opt/timekeeper/,type=volume"
+        "source=timekeeper-agent-scripts,target=/opt/timekeeper/,type=volume"
     ],
     // Configure tool-specific properties.
     "customizations": {
@@ -40,17 +40,22 @@
                 "python.linting.pylintEnabled": false,
                 "python.formatting.provider": "yapf",
                 "python.formatting.yapfPath": "/usr/local/py-utils/bin/yapf",
+                "python.formatting.yapfArgs": [
+                    "--style={based_on_style: google,column_limit: 120,split_before_logical_operator: True,align_closing_bracket_with_visual_indent: True,allow_multiline_dictionary_keys: True,allow_multiline_lambdas: True,blank_line_before_nested_class_or_def: True,indent_dictionary_value: True,dedent_closing_brackets: True,no_spaces_around_selected_binary_operators: set(),split_before_expression_after_opening_paren: True,split_arguments_when_comma_terminated: True,split_complex_comprehension: True}"
+                ],
                 "python.linting.flake8Path": "/usr/local/py-utils/bin/flake8",
                 "python.linting.flake8Enabled": true,
                 "python.linting.flake8Args": [
                     "--max-line-length=120"
-                ]
+                ],
+                "python.linting.mypyEnabled": true
             },
             // Add the IDs of extensions you want installed when the container is created.
             "extensions": [
                 "ms-python.python",
                 "ms-python.vscode-pylance",
-                "octref.vetur"
+                "octref.vetur",
+                "github.copilot"
             ]
         }
     },
